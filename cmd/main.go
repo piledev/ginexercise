@@ -7,16 +7,16 @@ import (
 
 func main() {
 	// Engineインスタンスを取得する。
-	router := gin.Default()
+	engin := gin.Default()
 
 	// Glob：パターンマッチング
 	// Globパターンで取得したHTMLファイルをHTMLファイルをレンダラーに関連付ける。
-	router.LoadHTMLGlob("../templates/*.html")
+	engin.LoadHTMLGlob("../templates/*.html")
 
-	router.Static("/templates", "../templates")
+	engin.Static("/templates", "../templates")
 
 	// GET is shortcut for router.Handle("GET",path,handle).
 	// Handle registers a new request handle and middleware with the given path and method.
-	router.GET("/", controller.IndexGET)
-	router.Run(":8080")
+	engin.GET("/", controller.IndexGET)
+	engin.Run(":8080")
 }
