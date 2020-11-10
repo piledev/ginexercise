@@ -13,6 +13,8 @@ func main() {
 	// Globパターンで取得したHTMLファイルをHTMLファイルをレンダラーに関連付ける。
 	router.LoadHTMLGlob("../templates/*.html")
 
+	router.Static("/templates", "../templates")
+
 	// GET is shortcut for router.Handle("GET",path,handle).
 	// Handle registers a new request handle and middleware with the given path and method.
 	router.GET("/", controller.IndexGET)
