@@ -13,6 +13,8 @@ func main() {
 	// Globパターンで取得したHTMLファイルをHTMLファイルをレンダラーに関連付ける。
 	engin.LoadHTMLGlob("../templates/*.html")
 
+	// 静的ファイルの置き場所を指定する。
+	// URLで直接指定が可能になる。
 	engin.Static("/templates", "../templates")
 
 	// GET is shortcut for router.Handle("GET",path,handle).
