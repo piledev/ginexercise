@@ -9,6 +9,6 @@ import (
 // IndexGET displays application index page
 func IndexGET(c *gin.Context) {
 	c.HTML(http.StatusOK, "index.html", gin.H{
-		"message": "Hello Taro!",
+		"message": "Hello go/gin/gorm!",
 	})
 }
