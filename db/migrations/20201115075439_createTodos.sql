@@ -2,7 +2,7 @@
 -- +goose Up
 -- SQL in section 'Up' is executed when this migration is applied
 CREATE TABLE IF NOT EXISTS todos (
-    id INT UNSIGNED NOT NULL,
+    id INT UNSIGNED AUTO_INCREMENT,
     done BOOLEAN NOT NULL DEFAULT FALSE,
     title VARCHAR(255) ,
     detail VARCHAR(255) ,

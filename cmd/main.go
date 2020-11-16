@@ -1,13 +1,15 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 )
 
 // Todo is construction
 type Todo struct {
-	ID     int
+	ID     int `gorm:"primary_key"`
 	Done   bool
 	Title  string
 	Detail string
@@ -29,6 +31,59 @@ func gormConnect() *gorm.DB {
 	return db
 }
 
+func gormExercise(db *gorm.DB) {
+
+	// delete all records
+	todo := Todo{}
+	db.Delete(&todo)
+
+	// insert 4 records
+	for i := 0; i < 4; i++ {
+		todofor := Todo{}
+		todofor.Title = fmt.Sprintf("insert_%v", i)
+		db.Create(&todofor)
+	}
+
+	// select records
+	maxid := 0
+	todos := []Todo{}
+	db.Find(&todos, "title like ?", "Insert%")
+
+	// update records
+	todosAfter := todos
+	for _, r := range &todosAfter {
+		r.Detail = "update_records"
+		if maxid < r.ID {
+			maxid = r.ID
+		}
+		fmt.Println(r.ID, r.Detail)
+	}
+	db.Model(&todos).Update(&todosAfter)
+
+	// select a record pattern 1
+	todo = Todo{}
+	todo.ID = maxid
+	db.First(&todo)
+
+	// update a record
+	todoAfter := todo
+	todoAfter.Detail = "update_maxid"
+	db.Model(&todo).Update(&todoAfter)
+
+	// select a record pattern 2
+	todo = Todo{}
+	db.First(&todo, "title like ?", "%1")
+
+	// update a record
+	todoAfter = todo
+	todoAfter.Detail = "update_like_1"
+	db.Model(&todo).Update(&todoAfter)
+
+	// delete a record
+	// todo = Todo{}
+
+}
+
 func main() {
 
 	db := gormConnect()
@@ -37,19 +92,7 @@ func main() {
 	// DB初期化（マイグレーション）→ gooseでやるから不要
 	// db.AutoMigrate(&todo)
 
-	// 構造体のインスタンス化
-	todo := Todo{}
-
-	// Insert
-	todo.ID = 1
-	todo.Title = "test"
-	db.Create(&todo)
-
-	// Select Update
-
-	// Select multi
-
-	// Delete
+	gormExercise(db)
 
 	// // Engineインスタンスを取得する。
 	// engin := gin.Default()
