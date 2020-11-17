@@ -3,11 +3,13 @@ package main
 import (
 	"fmt"
 
+	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
+	"github.com/yokoyamada/ginexercise/controller"
 )
 
-// Todo is construction
+// Todo is structure
 type Todo struct {
 	ID     int `gorm:"primary_key"`
 	Done   bool
@@ -33,6 +35,9 @@ func gormConnect() *gorm.DB {
 
 func gormExercise(db *gorm.DB) {
 
+	// DB初期化（マイグレーション）→ gooseでやるから不要
+	// db.AutoMigrate(&todo)
+
 	// delete all records
 	todo := Todo{}
 	db.Delete(&todo)
@@ -46,19 +51,30 @@ func gormExercise(db *gorm.DB) {
 
 	// select records
 	maxid := 0
+	minid := 0
 	todos := []Todo{}
 	db.Find(&todos, "title like ?", "Insert%")
 
-	// update records
-	todosAfter := todos
-	for _, r := range &todosAfter {
-		r.Detail = "update_records"
+	// id の最大値の取得
+	for _, r := range todos {
 		if maxid < r.ID {
 			maxid = r.ID
 		}
-		fmt.Println(r.ID, r.Detail)
+		if minid == 0 || r.ID < minid {
+			minid = r.ID
+		}
 	}
-	db.Model(&todos).Update(&todosAfter)
+
+	// update records
+	// こんなことはできそうでできない。
+	// todosAfter := []Todo{}
+	// for _, r := range todos {
+	// 	r.Detail = "update_records"
+	// 	todosAfter = append(todosAfter, r)
+	// }
+	// db.Model(&todos).Updates(&todosAfter)
+	// やるならこんな方法
+	db.Model(&todo).Where("1=1").Update("detail", "update_all_records")
 
 	// select a record pattern 1
 	todo = Todo{}
@@ -72,7 +88,7 @@ func gormExercise(db *gorm.DB) {
 
 	// select a record pattern 2
 	todo = Todo{}
-	db.First(&todo, "title like ?", "%1")
+	db.First(&todo, "title like ?", "%2")
 
 	// update a record
 	todoAfter = todo
@@ -80,7 +96,9 @@ func gormExercise(db *gorm.DB) {
 	db.Model(&todo).Update(&todoAfter)
 
 	// delete a record
-	// todo = Todo{}
+	todo = Todo{}
+	todo.ID = minid
+	db.Delete(&todo)
 
 }
 
@@ -89,24 +107,22 @@ func main() {
 	db := gormConnect()
 	defer db.Close()
 
-	// DB初期化（マイグレーション）→ gooseでやるから不要
-	// db.AutoMigrate(&todo)
+	// gormの練習（select, insert, update, delete を一通り）
+	// gormExercise(db)
 
-	gormExercise(db)
+	// Engineインスタンスを取得する。
+	engin := gin.Default()
 
-	// // Engineインスタンスを取得する。
-	// engin := gin.Default()
+	// Glob：パターンマッチング
+	// Globパターンで取得したHTMLファイルをHTMLファイルをレンダラーに関連付ける。
+	engin.LoadHTMLGlob("../templates/*.html")
 
-	// // Glob：パターンマッチング
-	// // Globパターンで取得したHTMLファイルをHTMLファイルをレンダラーに関連付ける。
-	// engin.LoadHTMLGlob("../templates/*.html")
+	// 静的ファイルの置き場所を指定する。
+	// URLで直接指定が可能になる。
+	engin.Static("/templates", "../templates")
 
-	// // 静的ファイルの置き場所を指定する。
-	// // URLで直接指定が可能になる。
-	// engin.Static("/templates", "../templates")
-
-	// // GET is shortcut for router.Handle("GET",path,handle).
-	// // Handle registers a new request handle and middleware with the given path and method.
-	// engin.GET("/", controller.IndexGET)
-	// engin.Run(":8080")
+	// GET is shortcut for router.Handle("GET",path,handle).
+	// Handle registers a new request handle and middleware with the given path and method.
+	engin.GET("/", controller.IndexGET)
+	engin.Run(":8080")
 }
