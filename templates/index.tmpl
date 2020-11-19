@@ -1,14 +1,22 @@
 <html>
     <head>
-        <body>
-            <h1>一覧</h1>
-            <form method="POST" action="/new">
-                <p>ID<input type="text" name="ID" size="30" ></p>
-                <p>タイトル<input type="text" name="title" size="30" placeholder="入力してください"></p>
-                <p>詳細<input type="text" name="detail"></p>
-                <p><input type="checkbox"></p>
-            </form>
-            
-        </body>
+        <title>the first app on Gin WAF</title>
     </head>
+    <body>
+        <h1>一覧</h1>
+        <form method="post" action="/new">
+            <p>ID<input type="text" name="ID" size="30" ></p>
+            <p>タイトル<input type="text" name="title" size="30" placeholder="入力してください"></p>
+            <p>詳細<input type="text" name="detail"></p>
+            <p><input type="checkbox"></p>
+        </form>
+        <ul>
+            {{ range .todos }}
+                <li>
+                    {{.Done}} {{.ID}} {{.Title}} 
+                    {{.Detail}}
+                </li>
+            {{ end }}
+        </ul>
+    </body>
 </html>

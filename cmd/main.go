@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
@@ -31,6 +32,73 @@ func gormConnect() *gorm.DB {
 		panic(err.Error())
 	}
 	return db
+}
+
+func getAll(db *gorm.DB) []Todo {
+	todos := []Todo{}
+	db.Find(&todos)
+	return todos
+}
+
+func create(db *gorm.DB, title string, detail string) {
+	todo := Todo{}
+	todo.Done = false
+	todo.Title = title
+	todo.Detail = detail
+	db.Create(&todo)
+}
+
+func main() {
+
+	db := gormConnect()
+	defer db.Close()
+
+	// gormの練習（select, insert, update, delete を一通り）
+	// gormExercise(db)
+
+	// Engineインスタンスを取得する。
+	engin := gin.Default()
+
+	// Glob：パターンマッチング
+	// Globパターンで取得したHTMLファイルをHTMLファイルをレンダラーに関連付ける。
+	engin.LoadHTMLGlob("../templates/*.tmpl")
+
+	// GET is shortcut for router.Handle("GET",path,handle).
+	// Handle registers a new request handle and middleware with the given path and method.
+	engin.GET("/", func(c *gin.Context) {
+		todos := getAll(db)
+		c.HTML(http.StatusOK, "index.tmpl", gin.H{
+			"todos": todos,
+		})
+	})
+
+	// engin.POST("/new", func(c *gin))
+	engin.Run(":8080")
+}
+
+func hoge() {
+
+	db := gormConnect()
+	defer db.Close()
+
+	// gormの練習（select, insert, update, delete を一通り）
+	// gormExercise(db)
+
+	// Engineインスタンスを取得する。
+	engin := gin.Default()
+
+	// Glob：パターンマッチング
+	// Globパターンで取得したHTMLファイルをHTMLファイルをレンダラーに関連付ける。
+	engin.LoadHTMLGlob("../templates/*.html")
+
+	// 静的ファイルの置き場所を指定する。
+	// URLで直接指定が可能になる。
+	engin.Static("/templates", "../templates")
+
+	// GET is shortcut for router.Handle("GET",path,handle).
+	// Handle registers a new request handle and middleware with the given path and method.
+	engin.GET("/", controller.IndexGET)
+	engin.Run(":8080")
 }
 
 func gormExercise(db *gorm.DB) {
@@ -99,30 +167,4 @@ func gormExercise(db *gorm.DB) {
 	todo = Todo{}
 	todo.ID = minid
 	db.Delete(&todo)
-
-}
-
-func main() {
-
-	db := gormConnect()
-	defer db.Close()
-
-	// gormの練習（select, insert, update, delete を一通り）
-	// gormExercise(db)
-
-	// Engineインスタンスを取得する。
-	engin := gin.Default()
-
-	// Glob：パターンマッチング
-	// Globパターンで取得したHTMLファイルをHTMLファイルをレンダラーに関連付ける。
-	engin.LoadHTMLGlob("../templates/*.html")
-
-	// 静的ファイルの置き場所を指定する。
-	// URLで直接指定が可能になる。
-	engin.Static("/templates", "../templates")
-
-	// GET is shortcut for router.Handle("GET",path,handle).
-	// Handle registers a new request handle and middleware with the given path and method.
-	engin.GET("/", controller.IndexGET)
-	engin.Run(":8080")
 }
