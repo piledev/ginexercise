@@ -80,11 +80,16 @@ func main() {
 		})
 	})
 
+	engin.GET("/selfy", func(c *gin.Context) {
+		c.Redirect(302, "/templates/selfy.aiart.png")
+	})
+
 	engin.POST("/new", func(c *gin.Context) {
 		title := c.PostForm("title")
 		detail := c.PostForm("detail")
 		done, _ := strconv.ParseBool(c.PostForm("done"))
 		create(db, title, detail, done)
+		c.Redirect(302, "/")
 
 	})
 	engin.Run(":8080")
