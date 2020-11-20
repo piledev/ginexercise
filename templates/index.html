@@ -3,10 +3,23 @@
     <head>
         <meta charset="UTF-8">
         <title>Sample App</title>
-        <!-- <link rel="stylesheet" href="//localhost:8080/templates/style.css"> -->
         <link rel="stylesheet" href="/templates/style.css">
     </head>
     <body>
-        <h1>{{.message}}</h1>
+        <h1>一覧</h1>
+        <form method="post" action="/new">
+            <p>タイトル　<input type="text" name="title" size="30" placeholder="例）買い物"></p>
+            <p>詳　　細　<input type="text" name="detail" size="30" placeholder="例）買う物リストはメモ参照"></p>
+            <p>完　　了　<input type="checkbox" name="done"></p>
+            <p><input type="submit" value="登録"></p>
+        </form>
+        <ul>
+            {{ range .todos }}
+                <li>
+                    {{.Done}} {{.ID}} {{.Title}} 
+                    {{.Detail}}
+                </li>
+            {{ end }}
+        </ul>
     </body>
 </html>

@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
@@ -40,9 +41,9 @@ func getAll(db *gorm.DB) []Todo {
 	return todos
 }
 
-func create(db *gorm.DB, title string, detail string) {
+func create(db *gorm.DB, title string, detail string, done bool) {
 	todo := Todo{}
-	todo.Done = false
+	todo.Done = done
 	todo.Title = title
 	todo.Detail = detail
 	db.Create(&todo)
@@ -61,18 +62,31 @@ func main() {
 
 	// Glob：パターンマッチング
 	// Globパターンで取得したHTMLファイルをHTMLファイルをレンダラーに関連付ける。
-	engin.LoadHTMLGlob("../templates/*.tmpl")
+	// ここには、go run 実行フォルダからの相対パスを書く必要がある
+	engin.LoadHTMLGlob("templates/*.html")
+
+	// 静的ファイルの置き場所を指定する。
+	// URLで直接指定が可能になる。
+	// 今回は css を使用するために指定している。
+	// ここに書くことで html の css の参照先の記載が有効になっている。
+	engin.Static("/templates", "templates")
 
 	// GET is shortcut for router.Handle("GET",path,handle).
 	// Handle registers a new request handle and middleware with the given path and method.
 	engin.GET("/", func(c *gin.Context) {
 		todos := getAll(db)
-		c.HTML(http.StatusOK, "index.tmpl", gin.H{
+		c.HTML(http.StatusOK, "index.html", gin.H{
 			"todos": todos,
 		})
 	})
 
-	// engin.POST("/new", func(c *gin))
+	engin.POST("/new", func(c *gin.Context) {
+		title := c.PostForm("title")
+		detail := c.PostForm("detail")
+		done, _ := strconv.ParseBool(c.PostForm("done"))
+		create(db, title, detail, done)
+
+	})
 	engin.Run(":8080")
 }
 
@@ -89,7 +103,7 @@ func hoge() {
 
 	// Glob：パターンマッチング
 	// Globパターンで取得したHTMLファイルをHTMLファイルをレンダラーに関連付ける。
-	engin.LoadHTMLGlob("../templates/*.html")
+	engin.LoadHTMLGlob("templates/*.html")
 
 	// 静的ファイルの置き場所を指定する。
 	// URLで直接指定が可能になる。
